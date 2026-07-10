@@ -1,0 +1,4 @@
+name: zmk-corne-display
+build:
+  cmake: .
+  kconfig: Kconfig

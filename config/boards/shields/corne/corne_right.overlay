@@ -1,0 +1,107 @@
+#include "corne.dtsi"
+#include <dt-bindings/pinctrl/nrf-pinctrl.h>
+#include <dt-bindings/input/input-event-codes.h>
+
+/*
+ * PAT9125 / PAT9126 optical trackball (I2C) on the right half.
+ *
+ * Default wiring in this project (change pins here if your PCB differs):
+ *   SDA  -> pro_micro pin 0  (P0.02)
+ *   SCL  -> pro_micro pin 1  (P0.06)
+ *   MOTION -> pro_micro pin 8 (P0.15), active low
+ *   BTN  -> pro_micro pin 10 (P1.01), active low
+ *
+ * I2C address (reg) depends on ID_SEL on the sensor module:
+ *   ID_SEL high -> 0x73, low -> 0x75, NC -> 0x79
+ */
+
+&pinctrl {
+    i2c0_pat912_default: i2c0_pat912_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 2)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 6)>;
+        };
+    };
+
+    i2c0_pat912_sleep: i2c0_pat912_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 2)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 6)>;
+            low-power-enable;
+        };
+    };
+};
+
+&pro_micro_i2c {
+    status = "okay";
+    pinctrl-0 = <&i2c0_pat912_default>;
+    pinctrl-1 = <&i2c0_pat912_sleep>;
+    pinctrl-names = "default", "sleep";
+    clock-frequency = <I2C_BITRATE_FAST>;
+
+    pat9125: pat9125@75 {
+        compatible = "pixart,pat912x";
+        reg = <0x75>;
+        status = "okay";
+
+        motion-gpios = <&pro_micro 8 GPIO_ACTIVE_LOW>;
+
+        zephyr,axis-x = <INPUT_REL_X>;
+        zephyr,axis-y = <INPUT_REL_Y>;
+
+        /* CPI 0–1275, step 5. Raise for faster cursor. */
+        res-x-cpi = <800>;
+        res-y-cpi = <800>;
+
+        /* Uncomment if axes are reversed on your mount: */
+        // invert-x;
+        // invert-y;
+    };
+};
+
+/ {
+    trackball_buttons: trackball_buttons {
+        compatible = "gpio-keys";
+        trackball_button: trackball_button {
+            gpios = <&pro_micro 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+            label = "TRACKBALL BTN";
+            zephyr,code = <INPUT_BTN_LEFT>;
+        };
+    };
+
+    split_inputs {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        trackball_split: trackball@0 {
+            compatible = "zmk,input-split";
+            reg = <0>;
+        };
+
+        trackball_btn_split: trackball_btn@1 {
+            compatible = "zmk,input-split";
+            reg = <1>;
+        };
+    };
+};
+
+&trackball_split {
+    device = <&pat9125>;
+};
+
+&trackball_btn_split {
+    device = <&trackball_buttons>;
+};
+
+&default_transform {
+    col-offset = <6>;
+};
+
+&kscan0 {
+    col-gpios = <&pro_micro 2 GPIO_ACTIVE_HIGH>,
+                <&pro_micro 7 GPIO_ACTIVE_HIGH>,
+                <&pro_micro 6 GPIO_ACTIVE_HIGH>,
+                <&pro_micro 5 GPIO_ACTIVE_HIGH>,
+                <&pro_micro 4 GPIO_ACTIVE_HIGH>,
+                <&pro_micro 3 GPIO_ACTIVE_HIGH>;
+};

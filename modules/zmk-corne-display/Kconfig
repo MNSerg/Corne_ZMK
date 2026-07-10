@@ -1,0 +1,16 @@
+menuconfig CORNE_DISPLAY
+    bool "Corne left-half OLED status screen"
+    depends on ZMK_DISPLAY && ZMK_SPLIT_ROLE_CENTRAL
+    select ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+    help
+      Custom 128x32 status screen for Corne v3 OLED on the central (left) half:
+      active layer, battery, host connection, split half link.
+
+if CORNE_DISPLAY
+
+config ZMK_WIDGET_SPLIT_HALF_STATUS
+    bool "Widget: split peripheral link (central)"
+    default y
+    select LV_USE_LABEL
+
+endif

@@ -1,0 +1,4 @@
+zephyr_include_directories(include)
+
+zephyr_library_sources_ifdef(CONFIG_CORNE_DISPLAY corne_status_screen.c)
+zephyr_library_sources_ifdef(CONFIG_ZMK_WIDGET_SPLIT_HALF_STATUS widgets/split_half_status.c)
