@@ -1,0 +1,83 @@
+#include "budget_corne.dtsi"
+#include <dt-bindings/pinctrl/nrf-pinctrl.h>
+#include <dt-bindings/input/input-event-codes.h>
+
+&default_transform {
+	col-offset = <6>;
+};
+
+/ {
+	chosen {
+		/delete-property/ zephyr,display;
+	};
+};
+
+&kscan0 {
+	col-gpios
+		= <&pro_micro 14 GPIO_ACTIVE_HIGH>
+		, <&pro_micro 15 GPIO_ACTIVE_HIGH>
+		, <&pro_micro 18 GPIO_ACTIVE_HIGH>
+		, <&pro_micro 19 GPIO_ACTIVE_HIGH>
+		, <&pro_micro 20 GPIO_ACTIVE_HIGH>
+		, <&pro_micro 21 GPIO_ACTIVE_HIGH>
+		;
+};
+
+&pro_micro_i2c {
+	status = "okay";
+
+	pat9125: pat9125@75 {
+		compatible = "pixart,pat912x";
+		reg = <0x75>;
+		status = "okay";
+		motion-gpios = <&pro_micro 8 GPIO_ACTIVE_LOW>;
+		zephyr,axis-x = <INPUT_REL_X>;
+		zephyr,axis-y = <INPUT_REL_Y>;
+		res-x-cpi = <800>;
+		res-y-cpi = <800>;
+	};
+};
+
+/ {
+	trackball_buttons: trackball_buttons {
+		compatible = "gpio-keys";
+		trackball_button: trackball_button {
+			gpios = <&pro_micro 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "TRACKBALL BTN";
+			zephyr,code = <INPUT_BTN_LEFT>;
+		};
+	};
+
+	split_inputs {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		trackball_split: trackball@0 {
+			compatible = "zmk,input-split";
+			reg = <0>;
+		};
+
+		trackball_btn_split: trackball_btn@1 {
+			compatible = "zmk,input-split";
+			reg = <1>;
+		};
+	};
+};
+
+&trackball_split {
+	device = <&pat9125>;
+};
+
+&trackball_btn_split {
+	device = <&trackball_buttons>;
+};
+
+/ {
+	chosen {
+		zmk,battery = &vbatt;
+	};
+
+	vbatt: vbatt {
+		compatible = "zmk,battery-nrf-vddh";
+	};
+};

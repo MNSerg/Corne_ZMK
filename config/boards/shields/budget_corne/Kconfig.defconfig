@@ -1,0 +1,26 @@
+if SHIELD_BUDGET_CORNE_LEFT
+
+config ZMK_KEYBOARD_NAME
+	default "Corne"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+	default y
+
+endif
+
+if SHIELD_BUDGET_CORNE_LEFT || SHIELD_BUDGET_CORNE_RIGHT
+
+config ZMK_SPLIT
+	default y
+
+if ZMK_DISPLAY
+
+config I2C
+	default y
+
+config SSD1306
+	default y
+
+endif # ZMK_DISPLAY
+
+endif

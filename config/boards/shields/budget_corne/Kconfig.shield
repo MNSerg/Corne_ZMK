@@ -1,0 +1,5 @@
+config SHIELD_BUDGET_CORNE_LEFT
+	def_bool $(shields_list_contains,budget_corne_left)
+
+config SHIELD_BUDGET_CORNE_RIGHT
+	def_bool $(shields_list_contains,budget_corne_right)

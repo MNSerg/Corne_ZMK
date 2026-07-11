@@ -1,0 +1,14 @@
+file_format: "1"
+id: budget_corne
+name: Budget Corne
+type: shield
+url: https://github.com/Bastardkb/TBK-Mini
+requires: [pro_micro]
+features:
+  - keys
+  - display
+  - underglow
+  - pointing
+siblings:
+  - budget_corne_left
+  - budget_corne_right
